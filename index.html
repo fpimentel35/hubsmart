@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hub de IA - O seu Agregador de Inteligência Artificial</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Estilos personalizados (versão original) */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #e5e7eb;
+            background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
+        }
+
+        .card-ia {
+            background-color: #1f2937;
+            border: 1px solid #374151;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.4s ease;
+            display: flex; /* Garante que o card seja flexível por padrão */
+        }
+
+        .card-ia:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 255, 255, 0.1);
+        }
+        
+        .botao-acessar {
+            background: linear-gradient(90deg, #00c6ff, #0072ff);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 198, 255, 0.2);
+        }
+
+        .botao-acessar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 198, 255, 0.4);
+        }
+
+        .tag {
+            background-color: #374151;
+            color: #d1d5db;
+        }
+        
+        #search-input {
+            background-color: #1f2937;
+            border: 1px solid #374151;
+        }
+
+        .filter-btn {
+            background-color: #374151;
+            transition: background-color 0.2s ease;
+        }
+        .filter-btn:hover {
+            background-color: #4b5563;
+        }
+        .filter-btn.active {
+            background: linear-gradient(90deg, #00c6ff, #0072ff);
+            color: white;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Cabeçalho -->
+    <header class="py-12 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">Hub de IA</h1>
+        <p class="text-lg text-gray-400">Explore as ferramentas de inteligência artificial mais inovadoras.</p>
+    </header>
+    
+    <!-- Controles de Busca e Filtro -->
+    <section class="container mx-auto px-6 mb-12">
+        <div class="flex flex-col md:flex-row gap-6">
+            <div class="flex-grow">
+                 <input type="text" id="search-input" placeholder="🔎 Buscar por nome em 100 IAs..." class="w-full p-3 rounded-lg text-white focus:ring-2 focus:ring-cyan-400 focus:outline-none">
+            </div>
+            <div id="category-filters" class="flex flex-wrap gap-2 justify-center">
+                <button class="filter-btn active py-2 px-4 rounded-lg text-sm" data-category="Todos">Todos</button>
+                <button class="filter-btn py-2 px-4 rounded-lg text-sm" data-category="Imagem">Imagem</button>
+                <button class="filter-btn py-2 px-4 rounded-lg text-sm" data-category="Texto">Texto</button>
+                <button class="filter-btn py-2 px-4 rounded-lg text-sm" data-category="Vídeo">Vídeo</button>
+                <button class="filter-btn py-2 px-4 rounded-lg text-sm" data-category="Código">Código</button>
+                <button class="filter-btn py-2 px-4 rounded-lg text-sm" data-category="Áudio">Áudio</button>
+                <button class="filter-btn py-2 px-4 rounded-lg text-sm" data-category="Produtividade">Produtividade</button>
+                <button class="filter-btn py-2 px-4 rounded-lg text-sm" data-category="Marketing">Marketing</button>
+                <button class="filter-btn py-2 px-4 rounded-lg text-sm" data-category="Pesquisa">Pesquisa</button>
+                <button class="filter-btn py-2 px-4 rounded-lg text-sm" data-category="3D">3D</button>
+            </div>
+        </div>
+    </section>
+
+    <main class="container mx-auto px-6 pb-8">
+        <!-- Seção do Banner -->
+        <section id="banner-section" class="mb-12 rounded-lg bg-[#111827] p-2">
+            <div class="flex justify-center items-center">
+                <!-- Coloque seu link e imagem do banner aqui -->
+                <a href="https://ocodigodosgenios.nicepage.io/Br" target="_blank" rel="noopener sponsored">
+                    <img src="https://i.postimg.cc/NjpjysQL/O-C-digo-dos-G-nios-970-x-200.png" 
+                         alt="Banner de publicidade" 
+                         class="rounded-md w-full h-auto">
+                </a>
+            </div>
+        </section>
+
+        <!-- Grade de Ferramentas de IA -->
+        <div id="ia-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <!-- Os cards de IA serão inseridos aqui pelo JavaScript -->
+        </div>
+        <div id="loader" class="text-center py-8 hidden">
+            <p class="text-cyan-400">Carregando mais ferramentas...</p>
+        </div>
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="text-center py-6 border-t border-gray-800 mt-12">
+        <p class="text-gray-500 text-sm">
+            &copy; <span id="ano-atual"></span> Hub de IA. Todos os direitos reservados.
+        </p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- CONSTANTES E VARIÁVEIS DE ESTADO ---
+            const initialLoadCount = 20;
+            const scrollLoadCount = 20;
+            let cardsLoaded = 0;
+            let isLoading = false;
+            let allCardsData = []; // Armazena todos os cards em memória
+            let filteredCards = []; // Armazena os cards filtrados
+
+            // --- ELEMENTOS DO DOM ---
+            const grid = document.getElementById('ia-grid');
+            const searchInput = document.getElementById('search-input');
+            const categoryFilters = document.getElementById('category-filters');
+            const anoSpan = document.getElementById('ano-atual');
+            const loader = document.getElementById('loader');
+
+            // --- FUNÇÕES ---
+
+            // Carrega os dados dos cards
+            function loadAllCardsData() {
+                // Lista de 100 Ferramentas de IA Únicas
+                allCardsData = [
+                    { name: 'ChatGPT', tags: 'Texto Produtividade Pesquisa', url: 'https://chat.openai.com/', logoText: 'GPT', description: 'Modelo de linguagem conversacional para responder perguntas, escrever textos e gerar código.' },
+                    { name: 'Midjourney', tags: 'Imagem Arte', url: 'https://www.midjourney.com/', logoText: 'MJ', description: 'Gera imagens artísticas de alta qualidade a partir de descrições textuais (prompts) via Discord.' },
+                    { name: 'DALL-E 3', tags: 'Imagem Design', url: 'https://openai.com/dall-e-3', logoText: 'DALL-E', description: 'Cria imagens fotorrealistas e criativas a partir de texto, integrado com o ChatGPT.' },
+                    { name: 'RunwayML', tags: 'Vídeo Imagem Edição', url: 'https://runwayml.com/', logoText: 'Runway', description: 'Suite de edição de vídeo com IA, incluindo geração de vídeo a partir de texto (Gen-2).' },
+                    { name: 'GitHub Copilot', tags: 'Código Produtividade', url: 'https://github.com/features/copilot', logoText: 'Copilot', description: 'Assistente de IA que sugere código e funções inteiras diretamente no seu editor de código.' },
+                    { name: 'ElevenLabs', tags: 'Áudio Voz', url: 'https://elevenlabs.io/', logoText: 'Eleven', description: 'Gera vozes sintéticas ultra-realistas em diversos idiomas e estilos, além de clonagem de voz.' },
+                    { name: 'Canva Magic Studio', tags: 'Design Imagem Marketing Vídeo', url: 'https://www.canva.com/magic-studio/', logoText: 'Canva', description: 'Conjunto de ferramentas de IA do Canva para criar designs, vídeos e textos rapidamente.' },
+                    { name: 'Notion AI', tags: 'Produtividade Texto', url: 'https://www.notion.so/product/ai', logoText: 'Notion', description: 'Assistente de IA integrado ao Notion para resumir, gerar ideias e organizar anotações.' },
+                    { name: 'Leonardo.Ai', tags: 'Imagem Arte 3D', url: 'https://leonardo.ai/', logoText: 'Leo.Ai', description: 'Plataforma para criar assets de jogos, como texturas e modelos, com IA generativa.' },
+                    { name: 'Synthesia', tags: 'Vídeo Marketing', url: 'https://www.synthesia.io/', logoText: 'Synthesia', description: 'Cria vídeos com avatares de IA realistas a partir de texto, ideal para treinamentos.' },
+                    { name: 'Perplexity AI', tags: 'Pesquisa Produtividade Texto', url: 'https://www.perplexity.ai/', logoText: 'Perplexity', description: 'Motor de busca conversacional que fornece respostas diretas com citações e fontes da web.' },
+                    { name: 'Adobe Firefly', tags: 'Imagem Design Edição', url: 'https://www.adobe.com/br/sensei/generative-ai/firefly.html', logoText: 'Firefly', description: 'IA generativa da Adobe, integrada ao Photoshop para preenchimento e criação de imagens.' },
+                    { name: 'Jasper', tags: 'Texto Marketing', url: 'https://www.jasper.ai/', logoText: 'Jasper', description: 'Plataforma de IA focada em gerar conteúdo para marketing, blogs, e-mails e redes sociais.' },
+                    { name: 'Claude', tags: 'Texto Produtividade Pesquisa', url: 'https://claude.ai/', logoText: 'Claude', description: 'Assistente de IA da Anthropic focado em segurança, conversas mais longas e análise de documentos.' },
+                    { name: 'Pika Labs', tags: 'Vídeo Arte', url: 'https://pika.art/', logoText: 'Pika', description: 'Gera vídeos curtos e animados a partir de texto ou imagens, com forte apelo artístico.' },
+                    { name: 'Suno', tags: 'Áudio Música', url: 'https://suno.com/', logoText: 'Suno', description: 'Cria músicas completas, incluindo vocais e instrumentos, a partir de simples prompts de texto.' },
+                    { name: 'Gamma', tags: 'Produtividade Design', url: 'https://gamma.app/', logoText: 'Gamma', description: 'Cria apresentações, documentos e páginas web visualmente atraentes a partir de texto.' },
+                    { name: 'HeyGen', tags: 'Vídeo Marketing', url: 'https://www.heygen.com/', logoText: 'HeyGen', description: 'Gerador de vídeos com avatares, clonagem de voz e tradução labial automática para outros idiomas.' },
+                    { name: 'Krea', tags: 'Imagem Design', url: 'https://www.krea.ai/', logoText: 'Krea', description: 'Gera imagens e padrões em tempo real a partir de sketches, movimentos do mouse e prompts.' },
+                    { name: 'Spline AI', tags: '3D Design', url: 'https://spline.design/ai', logoText: 'Spline', description: 'Gera objetos, cenas e texturas 3D a partir de prompts de texto diretamente no editor Spline.' },
+                    { name: 'Copy.ai', tags: 'Texto Marketing', url: 'https://www.copy.ai/', logoText: 'Copy.ai', description: 'Ferramenta de IA para criação de textos de marketing, e-mails e posts de blog de forma rápida.' },
+                    { name: 'QuillBot', tags: 'Texto Produtividade', url: 'https://quillbot.com/', logoText: 'QuillBot', description: 'Reescreve, resume e melhora textos, parafraseando sentenças para evitar plágio e melhorar a clareza.' },
+                    { name: 'Grammarly', tags: 'Produtividade Texto', url: 'https://www.grammarly.com/', logoText: 'Grammarly', description: 'Assistente de escrita que corrige gramática e estilo, oferecendo sugestões de IA para seus textos.' },
+                    { name: 'remove.bg', tags: 'Imagem Produtividade Edição', url: 'https://www.remove.bg/', logoText: 'remove.bg', description: 'Remove o fundo de imagens de forma automática e precisa com um único clique.' },
+                    { name: 'Clipdrop', tags: 'Imagem Design Edição', url: 'https://clipdrop.co/', logoText: 'Clipdrop', description: 'Ecossistema de aplicativos de IA para edição de imagens, como remoção de fundo e upscaling.' },
+                    { name: 'Looka', tags: 'Marketing Design Imagem', url: 'https://looka.com/', logoText: 'Looka', description: 'Cria logotipos e kits de identidade visual completos para marcas usando inteligência artificial.' },
+                    { name: 'Descript', tags: 'Vídeo Áudio Produtividade', url: 'https://www.descript.com/', logoText: 'Descript', description: 'Edita vídeos e podcasts como se estivesse editando um documento de texto, através da transcrição.' },
+                    { name: 'Pictory', tags: 'Vídeo Marketing', url: 'https://pictory.ai/', logoText: 'Pictory', description: 'Cria vídeos curtos e engajantes a partir de roteiros, artigos de blog ou vídeos longos.' },
+                    { name: 'Tabnine', tags: 'Código Produtividade', url: 'https://www.tabnine.com/', logoText: 'Tabnine', description: 'Assistente de código que aprende com seu estilo e projetos para oferecer sugestões personalizadas.' },
+                    { name: 'Replit Ghostwriter', tags: 'Código Produtividade', url: 'https://replit.com/ghostwriter', logoText: 'Replit', description: 'Ferramenta de IA para programar, depurar e explicar código dentro do ambiente Replit.' },
+                    { name: 'Murf.ai', tags: 'Áudio Voz', url: 'https://murf.ai/', logoText: 'Murf.ai', description: 'Gera narrações com vozes de IA de alta qualidade para vídeos, podcasts e apresentações.' },
+                    { name: 'Adobe Podcast', tags: 'Áudio Produtividade', url: 'https://podcast.adobe.com/enhance', logoText: 'Podcast', description: 'Melhora a qualidade de áudios gravados, removendo ruídos de fundo e eco automaticamente.' },
+                    { name: 'AIVA', tags: 'Áudio Música', url: 'https://www.aiva.ai/', logoText: 'AIVA', description: 'Compositor de música por IA que cria trilhas sonoras originais em diversos estilos.' },
+                    { name: 'Consensus', tags: 'Pesquisa Produtividade', url: 'https://consensus.app/', logoText: 'Consensus', description: 'Motor de busca que extrai e resume descobertas diretamente de artigos científicos.' },
+                    { name: 'Zapier', tags: 'Produtividade Automação', url: 'https://zapier.com/', logoText: 'Zapier', description: 'Automatiza tarefas entre diferentes aplicativos web, agora com funcionalidades de IA integradas.' },
+                    { name: 'Tome', tags: 'Produtividade Design', url: 'https://tome.app/', logoText: 'Tome', description: 'Cria apresentações e narrativas visuais a partir de um simples prompt de texto.' },
+                    { name: 'Luma AI', tags: '3D Imagem Vídeo', url: 'https://lumalabs.ai/', logoText: 'Luma', description: 'Cria modelos e cenas 3D realistas a partir de vídeos capturados com o celular.' },
+                    { name: 'SurferSEO', tags: 'Marketing Texto', url: 'https://surferseo.com/', logoText: 'SurferSEO', description: 'Otimiza conteúdo de blog para mecanismos de busca, analisando e comparando com concorrentes.' },
+                    { name: 'Artbreeder', tags: 'Imagem Arte', url: 'https://www.artbreeder.com/', logoText: 'Artbreeder', description: 'Cria e modifica imagens combinando diferentes "genes" de outras imagens para resultados únicos.' },
+                    { name: 'Fireflies.ai', tags: 'Produtividade', url: 'https://fireflies.ai/', logoText: 'Fireflies', description: 'Grava, transcreve, resume e analisa reuniões online automaticamente.' },
+                    { name: 'Playground AI', tags: 'Imagem Arte Design', url: 'https://playgroundai.com/', logoText: 'Playground', description: 'Plataforma online para criar e editar imagens com IA, oferecendo controle detalhado.' },
+                    { name: 'Opus Clip', tags: 'Vídeo Marketing', url: 'https://www.opus.pro/', logoText: 'Opus', description: 'Transforma vídeos longos em clipes curtos e virais para redes sociais com um clique.' },
+                    { name: 'Ideogram', tags: 'Imagem Design', url: 'https://ideogram.ai/', logoText: 'Ideogram', description: 'Gerador de imagens com excelente capacidade de renderizar texto de forma consistente e criativa.' },
+                    { name: 'Meshy', tags: '3D Imagem', url: 'https://www.meshy.ai/', logoText: 'Meshy', description: 'Cria modelos e texturas 3D a partir de prompts de texto e imagens 2D.' },
+                    { name: 'Magnific AI', tags: 'Imagem Edição', url: 'https://magnific.ai/', logoText: 'Magnific', description: 'Ferramenta de upscaling que melhora a resolução e adiciona detalhes a imagens de forma impressionante.' },
+                    { name: 'Beautiful.ai', tags: 'Produtividade Design', url: 'https://www.beautiful.ai/', logoText: 'Beautiful.ai', description: 'Cria apresentações com design profissional, aplicando regras de design automaticamente.' },
+                    { name: 'Cursor', tags: 'Código Produtividade', url: 'https://cursor.sh/', logoText: 'Cursor', description: 'Editor de código "IA-first", construído do zero para programar em conjunto com a IA.' },
+                    { name: 'InVideo', tags: 'Vídeo Marketing', url: 'https://invideo.io/', logoText: 'InVideo', description: 'Plataforma de criação de vídeos com IA que transforma texto em vídeos com avatares e locuções.' },
+                    { name: 'Topaz Photo AI', tags: 'Imagem Edição', url: 'https://www.topazlabs.com/topaz-photo-ai', logoText: 'Topaz', description: 'Software que melhora nitidez, remove ruído e aumenta a resolução de fotos com alta qualidade.' },
+                    { name: 'Udio', tags: 'Áudio Música', url: 'https://www.udio.com/', logoText: 'Udio', description: 'Gerador de músicas com vocais de alta qualidade a partir de texto, concorrente direto do Suno.' },
+                    { name: 'ClickUp AI', tags: 'Produtividade', url: 'https://clickup.com/ai', logoText: 'ClickUp', description: 'Assistente de IA integrado à plataforma de gerenciamento de projetos ClickUp para otimizar tarefas.' },
+                    { name: 'HubSpot AI', tags: 'Marketing Texto', url: 'https://www.hubspot.com/artificial-intelligence', logoText: 'HubSpot', description: 'Conjunto de ferramentas de IA para criar conteúdo, e-mails, relatórios e posts para redes sociais.' },
+                    { name: 'Poe', tags: 'Pesquisa Texto', url: 'https://poe.com/', logoText: 'Poe', description: 'Plataforma para conversar com múltiplos chatbots de IA (GPT, Claude, etc.) em um único lugar.' },
+                    { name: 'DeepL Write', tags: 'Texto Produtividade', url: 'https://www.deepl.com/write', logoText: 'DeepL', description: 'Ferramenta de escrita e tradução da DeepL com alta precisão para melhorar textos e e-mails.' },
+                    { name: 'D-ID', tags: 'Vídeo Imagem', url: 'https://www.d-id.com/', logoText: 'D-ID', description: 'Anima fotos estáticas e cria avatares falantes a partir de texto ou áudio.' },
+                    { name: 'Krisp', tags: 'Áudio Produtividade', url: 'https://krisp.ai/', logoText: 'Krisp', description: 'Remove ruídos de fundo, vozes e eco em chamadas de voz e reuniões em tempo real.' },
+                    { name: 'Decktopus AI', tags: 'Design Produtividade', url: 'https://www.decktopus.com/', logoText: 'Decktopus', description: 'Gerador de apresentações instantâneas que cria slides profissionais a partir de um tópico.' },
+                    { name: 'Make', tags: 'Produtividade Automação', url: 'https://www.make.com/en', logoText: 'Make', description: 'Plataforma visual para automação de fluxos de trabalho que integra centenas de aplicativos.' },
+                    { name: 'Semrush', tags: 'Marketing Pesquisa', url: 'https://www.semrush.com/', logoText: 'Semrush', description: 'Suite de marketing digital com várias ferramentas de IA para análise de SEO e concorrência.' },
+                    { name: 'NightCafe', tags: 'Imagem Arte', url: 'https://creator.nightcafe.studio/', logoText: 'NightCafe', description: 'Criação de arte com múltiplos algoritmos de IA, incluindo Stable Diffusion e DALL-E.' },
+                    { name: 'CodeWhisperer', tags: 'Código Produtividade', url: 'https://aws.amazon.com/codewhisperer/', logoText: 'CodeWhisperer', description: 'Gerador de código em tempo real da Amazon Web Services (AWS).' },
+                    { name: 'Kaedim', tags: '3D Imagem', url: 'https://www.kaedim3d.com/', logoText: 'Kaedim', description: 'Transforma imagens 2D em modelos 3D texturizados rapidamente.' },
+                    { name: 'Veed.io', tags: 'Vídeo Edição Marketing', url: 'https://www.veed.io/', logoText: 'Veed.io', description: 'Editor de vídeo online completo com ferramentas de IA para legendas, tradução e limpeza de áudio.' },
+                    { name: 'Fliki', tags: 'Vídeo Marketing Áudio', url: 'https://fliki.ai/', logoText: 'Fliki', description: 'Transforma texto em vídeos com vozes de IA realistas e uma vasta biblioteca de mídia.' },
+                    { name: 'Miro Assist', tags: 'Produtividade Design', url: 'https://miro.com/ai', logoText: 'Miro', description: 'Assistente de IA para brainstorming, diagramação e geração de ideias em quadros brancos.' },
+                    { name: 'Flick', tags: 'Marketing Texto', url: 'https://www.flick.tech/', logoText: 'Flick', description: 'Ferramenta de marketing para redes sociais com IA para agendamento, hashtags e criação de conteúdo.' },
+                    { name: 'Writesonic', tags: 'Texto Marketing', url: 'https://writesonic.com/', logoText: 'Writesonic', description: 'Gerador de texto otimizado para SEO, anúncios, e-mails e landing pages.' },
+                    { name: 'Wordtune', tags: 'Texto Produtividade', url: 'https://www.wordtune.com/', logoText: 'Wordtune', description: 'Assistente de escrita que reescreve suas frases para serem mais claras, concisas e eficazes.' },
+                    { name: 'Taskade', tags: 'Produtividade', url: 'https://www.taskade.com/', logoText: 'Taskade', description: 'Organizador de tarefas, notas e mapas mentais com um assistente de IA integrado.' },
+                    { name: 'LALAL.AI', tags: 'Áudio Música', url: 'https://www.lalal.ai/', logoText: 'LALAL.AI', description: 'Extrai vocais, acompanhamentos e instrumentos de qualquer áudio ou vídeo com alta precisão.' },
+                    { name: 'Kaiber', tags: 'Vídeo Imagem Arte', url: 'https://kaiber.ai/', logoText: 'Kaiber', description: 'Transforma suas imagens ou textos em vídeos musicais animados e visualmente cativantes.' },
+                    { name: 'Designs.ai', tags: 'Design Marketing Vídeo', url: 'https://designs.ai/', logoText: 'Designs.ai', description: 'Plataforma "all-in-one" que cria logos, vídeos, banners e mockups com IA em minutos.' },
+                    { name: 'BLACKBOX AI', tags: 'Código Pesquisa', url: 'https://www.blackbox.ai/', logoText: 'BLACKBOX', description: 'Busca de código e geração a partir de perguntas em linguagem natural para desenvolvedores.' },
+                    { name: 'Civitai', tags: 'Imagem Arte', url: 'https://civitai.com/', logoText: 'Civitai', description: 'Hub para compartilhar, descobrir e baixar modelos personalizados de Stable Diffusion.' },
+                    { name: 'Scribe', tags: 'Produtividade', url: 'https://scribehow.com/', logoText: 'Scribe', description: 'Cria tutoriais e guias passo a passo automaticamente, apenas gravando o seu fluxo de trabalho.' },
+                    { name: 'Scite.ai', tags: 'Pesquisa Texto', url: 'https://scite.ai/', logoText: 'Scite.ai', description: 'Descobre como artigos de pesquisa foram citados, mostrando se foram apoiados ou contestados.' },
+                    { name: 'DeepArt.io', tags: 'Imagem Arte', url: 'https://deepart.io/', logoText: 'DeepArt', description: 'Transforma fotos em obras de arte no estilo de pintores famosos usando redes neurais.' },
+                    { name: 'Postwise', tags: 'Marketing Texto', url: 'https://postwise.ai/', logoText: 'Postwise', description: 'Escreve e agenda posts para o Twitter (X) com IA, otimizando para engajamento.' },
+                    { name: 'Mem', tags: 'Produtividade Pesquisa', url: 'https://get.mem.ai/', logoText: 'Mem', description: 'Base de conhecimento pessoal que se organiza sozinha e encontra informações com IA.' },
+                    { name: 'VanceAI', tags: 'Imagem Edição', url: 'https://vanceai.com/', logoText: 'VanceAI', description: 'Suite de ferramentas online para edição de fotos com IA, como upscaler, denoiser e sharpener.' },
+                    { name: 'Frase.io', tags: 'Texto Marketing Pesquisa', url: 'https://www.frase.io/', logoText: 'Frase.io', description: 'Ajuda a pesquisar, escrever e otimizar conteúdo de SEO que ranqueia melhor.' },
+                    { name: 'Play.ht', tags: 'Áudio Voz', url: 'https://play.ht/', logoText: 'Play.ht', description: 'Gerador de texto para fala com vozes de IA ultra-realistas e clonagem de voz.' },
+                    { name: 'Motion', tags: 'Produtividade', url: 'https://www.usemotion.com/', logoText: 'Motion', description: 'Usa IA para planejar seu dia, agendar tarefas e gerenciar seu calendário automaticamente.' },
+                    { name: 'You.com', tags: 'Pesquisa Texto', url: 'https://you.com/', logoText: 'You.com', description: 'Motor de busca privado que integra um chatbot de IA para respostas diretas.' },
+                    { name: 'Let\'s Enhance', tags: 'Imagem Edição', url: 'https://letsenhance.io/', logoText: 'Let\'s Enhance', description: 'Melhora a qualidade e aumenta a resolução de imagens sem perda de qualidade.' },
+                    { name: 'Uizard', tags: 'Design Produtividade', url: 'https://uizard.io/', logoText: 'Uizard', description: 'Cria wireframes, mockups e protótipos de interfaces de apps e sites a partir de texto.' },
+                    { name: 'Sudowrite', tags: 'Texto', url: 'https://www.sudowrite.com/', logoText: 'Sudowrite', description: 'Assistente de escrita criativa para ficção, poesia e roteiros, ajudando a superar o bloqueio criativo.' },
+                    { name: 'Phind', tags: 'Código Pesquisa', url: 'https://www.phind.com/', logoText: 'Phind', description: 'Motor de busca para desenvolvedores que fornece respostas com exemplos de código.' },
+                    { name: 'Hugging Face', tags: 'Código Pesquisa', url: 'https://huggingface.co/', logoText: 'Hugging Face', description: 'Comunidade e plataforma para construir, treinar e implantar modelos de machine learning.' },
+                    { name: 'Otter.ai', tags: 'Produtividade Áudio', url: 'https://otter.ai/', logoText: 'Otter.ai', description: 'Transcreve reuniões e conversas de áudio em tempo real com alta precisão.' },
+                    { name: 'Gencraft', tags: 'Imagem Vídeo Arte', url: 'https://gencraft.com/', logoText: 'Gencraft', description: 'Gera vídeos e imagens artísticas personalizadas a partir de prompts de texto.' },
+                    { name: 'Beatoven.ai', tags: 'Áudio Música', url: 'https://www.beatoven.ai/', logoText: 'Beatoven.ai', description: 'Cria música de fundo única e livre de royalties para vídeos e podcasts.' },
+                    { name: 'ProfilePicture.ai', tags: 'Imagem', url: 'https://www.profilepicture.ai/', logoText: 'ProfilePicture', description: 'Cria fotos de perfil profissionais e artísticas usando suas próprias fotos.' },
+                    { name: 'Vidyo.ai', tags: 'Vídeo Marketing', url: 'https://vidyo.ai/', logoText: 'Vidyo.ai', description: 'Redireciona vídeos longos, como podcasts, em clipes curtos para mídias sociais.' },
+                    { name: 'AssemblyAI', tags: 'Código Áudio', url: 'https://www.assemblyai.com/', logoText: 'AssemblyAI', description: 'APIs para transcrição de fala para texto, resumo e análise de sentimento em áudios.' },
+                    { name: 'Gradio', tags: 'Código', url: 'https://www.gradio.app/', logoText: 'Gradio', description: 'Biblioteca Python para criar interfaces de usuário rápidas para seus modelos de machine learning.' },
+                    { name: 'Civitai', tags: 'Imagem Arte', url: 'https://civitai.com/', logoText: 'Civitai', description: 'Hub para compartilhar, descobrir e baixar modelos personalizados de Stable Diffusion.' }
+                ];
+
+                filteredCards = [...allCardsData];
+                handleFilter(true); // Carga inicial
+            }
+
+            function createCardElement(cardData) {
+                const card = document.createElement('div');
+                card.className = 'card-ia rounded-lg p-6 flex-col';
+                card.setAttribute('data-tags', cardData.tags);
+
+                const tagsHTML = cardData.tags.split(' ').map(tag => 
+                    `<span class="tag text-xs font-medium px-2 py-1 rounded-full">#${tag}</span>`
+                ).join(' ');
+
+                card.innerHTML = `
+                    <img src="https://placehold.co/100x100/1f2937/FFFFFF?text=${encodeURIComponent(cardData.logoText)}" alt="Logo de ${cardData.name}" class="w-20 h-20 rounded-full mx-auto mb-4 object-cover border-2 border-cyan-400">
+                    <h3 class="text-xl font-semibold text-white text-center mb-2">${cardData.name}</h3>
+                    <p class="text-gray-400 text-center text-sm mb-4 flex-grow">${cardData.description}</p>
+                    <div class="text-center mb-6 space-x-2">
+                        ${tagsHTML}
+                    </div>
+                    <button class="botao-acessar text-white font-bold py-2 px-4 rounded-lg w-full mt-auto" data-url="${cardData.url}">
+                        Acessar Ferramenta
+                    </button>
+                `;
+                return card;
+            }
+
+            function loadMoreCards() {
+                if (isLoading || cardsLoaded >= filteredCards.length) return;
+
+                isLoading = true;
+                loader.classList.remove('hidden');
+
+                // Simula um pequeno atraso para o loader ser visível
+                setTimeout(() => {
+                    const end = cardsLoaded + scrollLoadCount;
+                    const newCards = filteredCards.slice(cardsLoaded, end);
+
+                    newCards.forEach(cardData => {
+                        const cardElement = createCardElement(cardData);
+                        grid.appendChild(cardElement);
+                    });
+
+                    cardsLoaded = end;
+                    isLoading = false;
+                    loader.classList.add('hidden');
+
+                    if (cardsLoaded >= filteredCards.length) {
+                        loader.classList.add('hidden');
+                    }
+                }, 300); // 300ms de atraso
+            }
+            
+            function handleFilter(isInitialLoad = false) {
+                const searchTerm = searchInput.value.toLowerCase();
+                const activeCategory = categoryFilters.querySelector('.active').dataset.category.toLowerCase();
+
+                filteredCards = allCardsData.filter(card => {
+                    const matchesSearch = card.name.toLowerCase().includes(searchTerm);
+                    const matchesCategory = activeCategory === 'todos' || card.tags.toLowerCase().includes(activeCategory);
+                    return matchesSearch && matchesCategory;
+                });
+                
+                grid.innerHTML = '';
+                cardsLoaded = 0;
+                
+                const initialCount = isInitialLoad ? initialLoadCount : Math.min(scrollLoadCount, filteredCards.length);
+                const initialCards = filteredCards.slice(0, initialCount);
+                
+                initialCards.forEach(cardData => {
+                    const cardElement = createCardElement(cardData);
+                    grid.appendChild(cardElement);
+                });
+                cardsLoaded = initialCards.length;
+
+                if (cardsLoaded >= filteredCards.length) {
+                    loader.classList.add('hidden');
+                } else if(filteredCards.length > 0) {
+                    loader.classList.remove('hidden');
+                } else {
+                    grid.innerHTML = '<p class="text-gray-400 col-span-full text-center">Nenhuma ferramenta encontrada com os filtros selecionados.</p>';
+                    loader.classList.add('hidden');
+                }
+            }
+
+            // --- INICIALIZAÇÃO E EVENT LISTENERS ---
+            if (anoSpan) anoSpan.textContent = new Date().getFullYear();
+
+            grid.addEventListener('click', function(event) {
+                const button = event.target.closest('.botao-acessar');
+                if (button) {
+                    const url = button.getAttribute('data-url');
+                    if (url) window.open(url, '_blank', 'noopener,noreferrer');
+                }
+            });
+
+            window.addEventListener('scroll', () => {
+                if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+                    loadMoreCards();
+                }
+            }, { passive: true });
+
+            searchInput.addEventListener('input', () => handleFilter(false));
+
+            categoryFilters.addEventListener('click', function(event) {
+                if (event.target.tagName === 'BUTTON') {
+                    categoryFilters.querySelector('.active').classList.remove('active');
+                    event.target.classList.add('active');
+                    handleFilter(false);
+                }
+            });
+
+            loadAllCardsData();
+        });
+    </script>
+
+</body>
+</html>
